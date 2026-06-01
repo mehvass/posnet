@@ -11,8 +11,9 @@ app.get("/pay", (req, res) => {
   res.send("PAY OK");
 });
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 8080;
 
+// 🔥 KRİTİK SATIR
 app.listen(PORT, "0.0.0.0", () => {
   console.log("Server çalışıyor, port:", PORT);
 });
