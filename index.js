@@ -1,46 +1,67 @@
 const express = require("express");
-const crypto = require("crypto");
-
+const axios = require("axios");
 const app = express();
 
+app.use(express.urlencoded({ extended: true }));
+
+// ROOT
 app.get("/", (req, res) => {
   res.send("OK ROOT");
 });
 
-app.get("/pay", (req, res) => {
-  const orderId = "ORDER123";
-  const amount = "100";
-
+// 🔥 1. ADIM → POSNET XML REQUEST
+app.get("/pay", async (req, res) => {
   const MID = "6700972665";
   const TID = "67C36594";
-  const POSNET_ID = "1010082528833803";
-  const ENCKEY = "10,10,10,10,10,10,10,10";
 
-  // 🔥 BASİT HASH (test için)
-  const hash = crypto
-    .createHash("sha256")
-    .update(orderId + amount + MID)
-    .digest("hex");
+  const xml = `
+  <posnetRequest>
+    <mid>${MID}</mid>
+    <tid>${TID}</tid>
+    <oosRequestData>
+      <amount>100</amount>
+      <currencyCode>TL</currencyCode>
+      <installment>00</installment>
+      <orderID>ORDER123</orderID>
+      <returnURL>https://proud-acceptance-production-b5b5.up.railway.app/callback</returnURL>
+    </oosRequestData>
+  </posnetRequest>
+  `;
 
-  res.send(`
-    <html>
-      <body>
-        <h2>Güvenli Ödeme</h2>
+  try {
+    const response = await axios.post(
+      "https://setmpos.ykb.com/PosnetWebService/XML",
+      xml,
+      {
+        headers: { "Content-Type": "text/xml" }
+      }
+    );
 
-        <form method="POST" action="https://setmpos.ykb.com/PosnetWebService/XML">
-          <input type="hidden" name="mid" value="${MID}" />
-          <input type="hidden" name="tid" value="${TID}" />
-          <input type="hidden" name="posnetId" value="${POSNET_ID}" />
-          <input type="hidden" name="amount" value="${amount}" />
-          <input type="hidden" name="orderId" value="${orderId}" />
-          <input type="hidden" name="hash" value="${hash}" />
+    const data = response.data;
 
-          <button type="submit">Yapı Kredi ile Öde</button>
-        </form>
+    // ⚠️ burada XML parse yapılmalı (şimdilik basit bırakıyorum)
+    // gerçek projede xml2js kullanacağız
 
-      </body>
-    </html>
-  `);
+    // DEMO olarak direkt yönlendirme
+    res.send(`
+      <html>
+        <body>
+          <h2>3D Yönlendiriliyor...</h2>
+          <pre>${data}</pre>
+        </body>
+      </html>
+    `);
+
+  } catch (err) {
+    res.send("HATA: " + err.message);
+  }
+});
+
+// 🔥 2. ADIM → CALLBACK
+app.post("/callback", (req, res) => {
+  console.log("BANKA DÖNDÜ:", req.body);
+
+  res.send("Ödeme sonucu alındı");
 });
 
 const PORT = process.env.PORT;
