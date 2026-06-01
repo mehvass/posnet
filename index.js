@@ -1,19 +1,22 @@
 const express = require("express");
 const app = express();
 
-app.use(express.urlencoded({ extended: true }));
+// Railway debug
+console.log("ENV PORT:", process.env.PORT);
 
+// ROOT TEST
 app.get("/", (req, res) => {
-  res.send("SERVER OK");
+  res.send("OK ROOT");
 });
 
+// PAY TEST
 app.get("/pay", (req, res) => {
-  res.send("PAY OK");
+  res.send("OK PAY");
 });
 
-const PORT = process.env.PORT || 8080;
+// 🔥 EN KRİTİK KISIM
+const PORT = parseInt(process.env.PORT) || 3000;
 
-// 🔥 KRİTİK SATIR
 app.listen(PORT, "0.0.0.0", () => {
-  console.log("Server çalışıyor, port:", PORT);
+  console.log("SERVER STARTED ON:", PORT);
 });
