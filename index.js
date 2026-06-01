@@ -1,9 +1,13 @@
 const express = require("express");
 const app = express();
 
+app.get("/", (req, res) => {
+  res.send("SERVER OK");
+});
+
 app.get("/pay", (req, res) => {
   const orderId = "ORDER123";
-  const amount = "100"; // 1 TL = 100 kuruş
+  const amount = "100";
 
   const MID = "6700972665";
   const TID = "67C36594";
@@ -19,7 +23,7 @@ app.get("/pay", (req, res) => {
           <input type="hidden" name="posnetId" value="${POSNET_ID}" />
           <input type="hidden" name="amount" value="${amount}" />
           <input type="hidden" name="orderId" value="${orderId}" />
-          
+
           <button type="submit">Yapı Kredi ile Öde</button>
         </form>
       </body>
@@ -27,4 +31,8 @@ app.get("/pay", (req, res) => {
   `);
 });
 
-app.listen(process.env.PORT || 3000);
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+  console.log("Server çalışıyor, port:", PORT);
+});
