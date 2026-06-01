@@ -1,4 +1,6 @@
 const express = require("express");
+const crypto = require("crypto");
+
 const app = express();
 
 app.get("/", (req, res) => {
@@ -7,11 +9,18 @@ app.get("/", (req, res) => {
 
 app.get("/pay", (req, res) => {
   const orderId = "ORDER123";
-  const amount = "100"; // 1 TL = 100 kuruş
+  const amount = "100";
 
   const MID = "6700972665";
   const TID = "67C36594";
   const POSNET_ID = "1010082528833803";
+  const ENCKEY = "10,10,10,10,10,10,10,10";
+
+  // 🔥 BASİT HASH (test için)
+  const hash = crypto
+    .createHash("sha256")
+    .update(orderId + amount + MID)
+    .digest("hex");
 
   res.send(`
     <html>
@@ -24,6 +33,7 @@ app.get("/pay", (req, res) => {
           <input type="hidden" name="posnetId" value="${POSNET_ID}" />
           <input type="hidden" name="amount" value="${amount}" />
           <input type="hidden" name="orderId" value="${orderId}" />
+          <input type="hidden" name="hash" value="${hash}" />
 
           <button type="submit">Yapı Kredi ile Öde</button>
         </form>
